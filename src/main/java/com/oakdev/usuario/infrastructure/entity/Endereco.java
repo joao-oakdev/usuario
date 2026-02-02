@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table (name = "endereco")
+@Table(name = "endereco")
 @Builder
 public class Endereco {
 
@@ -33,9 +33,6 @@ public class Endereco {
     private String cep;
     @Column(name = "usuario_id")
     private Long usuario_id;
-
-
-
 
 
 }
