@@ -38,8 +38,11 @@ public class SecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/usuario/endereco/**").permitAll()
+                        .requestMatchers("/usuario/**").authenticated()
                         .anyRequest().authenticated() // Remova o /usuario/** temporariamente para testar
 
                 )
