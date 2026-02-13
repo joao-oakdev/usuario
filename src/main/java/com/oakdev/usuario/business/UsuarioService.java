@@ -10,11 +10,18 @@ import com.oakdev.usuario.infrastructure.entity.Telefone;
 import com.oakdev.usuario.infrastructure.entity.Usuario;
 import com.oakdev.usuario.infrastructure.exceptions.ConflictException;
 import com.oakdev.usuario.infrastructure.exceptions.ResourceNotFoundException;
+import com.oakdev.usuario.infrastructure.exceptions.UnauthorizedException;
 import com.oakdev.usuario.infrastructure.repository.EnderecoRepository;
 import com.oakdev.usuario.infrastructure.repository.TelefoneRepository;
 import com.oakdev.usuario.infrastructure.repository.UsuarioRepository;
 import com.oakdev.usuario.infrastructure.security.JwtUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +35,7 @@ public class UsuarioService {
     private final JwtUtil jwtUtil;
     private final EnderecoRepository enderecoRepository;
     private final TelefoneRepository telefoneRepository;
+    private final AuthenticationManager authenticationManager;
 
     public UsuarioDTO salvaUsuario(UsuarioDTO usuarioDTO) {
         emailExiste(usuarioDTO.getEmail());
@@ -121,5 +129,20 @@ public class UsuarioService {
         Telefone telefone = usuarioMapper.paraTelefoneEntity(dto, usuario.getId());
         return usuarioMapper.paraTelefoneDTO(telefoneRepository.save(telefone));
     }
+
+    public String autenticarUsuario(UsuarioDTO dto){
+        try{
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getEmail(),
+                        dto.getSenha())
+        );
+        return "Bearer " + jwtUtil.generateToken(authentication.getName());
+    }catch (BadCredentialsException | UsernameNotFoundException | AuthorizationDeniedException exception){
+            throw new UnauthorizedException("Usuário ou senha inválidos", exception.getCause());
+
+
+        }
+
+        }
 }
 
